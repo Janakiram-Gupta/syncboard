@@ -1,7 +1,18 @@
 import { useState } from "react";
+import Whiteboard from "./components/Whiteboard";
 
 function App() {
   const [roomId, setRoomId] = useState("");
+  const [joined, setJoined] = useState(false);
+
+  const handleJoin = () => {
+    if (!roomId.trim()) return;
+    setJoined(true);
+  };
+
+  if (joined) {
+    return <Whiteboard roomId={roomId} />;
+  }
 
   return (
     <div style={container}>
@@ -15,7 +26,9 @@ function App() {
         style={input}
       />
 
-      <button style={button}>Join Board</button>
+      <button style={button} onClick={handleJoin}>
+        Join Board
+      </button>
     </div>
   );
 }
