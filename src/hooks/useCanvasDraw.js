@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { sendDrawEvent, getSocket } from "../utils/socket";
+import throttle from "../utils/throttle";
 
 export default function useCanvasDraw(canvasRef) {
 
@@ -13,6 +14,8 @@ export default function useCanvasDraw(canvasRef) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
+
+  const throttledDrawEvent = throttle(sendDrawEvent, 30);
 
   useEffect(() => {
 
@@ -41,7 +44,7 @@ export default function useCanvasDraw(canvasRef) {
       ctx.lineTo(e.clientX, e.clientY);
       ctx.stroke();
 
-      sendDrawEvent({
+      throttledDrawEvent({
         x: e.clientX,
         y: e.clientY,
         color,

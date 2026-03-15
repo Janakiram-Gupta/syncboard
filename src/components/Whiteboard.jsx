@@ -6,6 +6,7 @@ import useCanvasDraw from "../hooks/useCanvasDraw";
 import "../styles/board.css";
 import TextLayer from "./TextLayer";
 import { sendTextEvent, sendClearEvent } from "../utils/socket";
+import throttle from "../utils/throttle";
 
 function Whiteboard() {
   const canvasRef = useRef(null);
@@ -58,20 +59,20 @@ function Whiteboard() {
   }, [clearCanvas]);
 
   useEffect(() => {
-
-    const handleMouseMove = (e) => {
-
+    const throttledCursor = throttle((e) => {
       sendCursorEvent({
         x: e.clientX,
         y: e.clientY
       });
 
+    }, 50);
+
+    const handleMouseMove = (e) => {
+      throttledCursor(e);
     };
-
     window.addEventListener("mousemove", handleMouseMove);
-
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-
+    return () =>
+      window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   useEffect(() => {
