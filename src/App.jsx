@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Whiteboard from "./components/Whiteboard";
+import { connectSocket } from "./utils/socket";
 
 function App() {
   const [roomId, setRoomId] = useState("");
@@ -7,6 +8,7 @@ function App() {
 
   const handleJoin = () => {
     if (!roomId.trim()) return;
+    connectSocket(roomId);
     setJoined(true);
   };
 
