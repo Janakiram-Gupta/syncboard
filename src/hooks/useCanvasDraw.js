@@ -7,6 +7,13 @@ export default function useCanvasDraw(canvasRef) {
   const [color, setColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(3);
 
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
   useEffect(() => {
 
     const canvas = canvasRef.current;
@@ -84,6 +91,7 @@ export default function useCanvasDraw(canvasRef) {
     color,
     setColor,
     strokeWidth,
-    setStrokeWidth
+    setStrokeWidth,
+    clearCanvas
   };
 }

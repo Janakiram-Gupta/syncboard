@@ -5,7 +5,7 @@ import UserList from "./UserList";
 import useCanvasDraw from "../hooks/useCanvasDraw";
 import "../styles/board.css";
 import TextLayer from "./TextLayer";
-import { sendTextEvent } from "../utils/socket";
+import { sendTextEvent, sendClearEvent } from "../utils/socket";
 
 function Whiteboard() {
   const canvasRef = useRef(null);
@@ -17,7 +17,8 @@ function Whiteboard() {
     color,
     setColor,
     strokeWidth,
-    setStrokeWidth
+    setStrokeWidth,
+    clearCanvas
   } = useCanvasDraw(canvasRef);
 
   useEffect(() => {
@@ -47,9 +48,14 @@ function Whiteboard() {
         setTexts((prev) => [...prev, message.data]);
       }
 
+      if (message.type === "clear") {
+        clearCanvas();
+        setTexts([]);
+      }
+
     };
 
-  }, []);
+  }, [clearCanvas]);
 
   useEffect(() => {
 
@@ -96,6 +102,14 @@ function Whiteboard() {
     sendTextEvent(newText);
   };
 
+  const handleClearBoard = () => {
+    clearCanvas();
+    setTexts([]);
+
+    sendClearEvent();
+
+  };
+
   return (
     <div className="board-container">
       <UserList users={users} />
@@ -121,7 +135,7 @@ function Whiteboard() {
           onChange={(e) => setStrokeWidth(e.target.value)}
         />
 
-        <button onClick={() => window.location.reload()}>
+        <button onClick={handleClearBoard}>
           Clear
         </button>
 

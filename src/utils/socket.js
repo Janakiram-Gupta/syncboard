@@ -59,3 +59,18 @@ export function sendTextEvent(data) {
     })
   );
 }
+
+export function sendClearEvent() {
+
+  if (!socket) return;
+
+  socket.send(
+    JSON.stringify({
+      type: "broadcast",
+      payload: {
+        type: "clear"
+      }
+    })
+  );
+
+}
