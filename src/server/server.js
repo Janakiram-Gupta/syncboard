@@ -6,6 +6,8 @@ const wss = new WebSocketServer({ port: PORT });
 
 const rooms = {};
 
+const users = {};
+
 console.log(`WebSocket server running on port ${PORT}`);
 
 wss.on("connection", (socket) => {
@@ -24,11 +26,28 @@ wss.on("connection", (socket) => {
 
         if (!rooms[currentRoom]) {
           rooms[currentRoom] = new Set();
+          users[currentRoom] = [];
         }
 
-        rooms[currentRoom].add(socket);
+        const userId = Math.random().toString(36).substring(2, 9);
 
-        console.log(`User joined room ${currentRoom}`);
+        socket.userId = userId;
+
+        rooms[currentRoom].add(socket);
+        users[currentRoom].push(userId);
+
+        console.log(`User ${userId} joined room ${currentRoom}`);
+
+        rooms[currentRoom].forEach((client) => {
+          if (client.readyState === 1) {
+            client.send(
+              JSON.stringify({
+                type: "user_list",
+                users: users[currentRoom]
+              })
+            );
+          }
+        });
 
         break;
 
@@ -55,10 +74,25 @@ wss.on("connection", (socket) => {
 
       rooms[currentRoom].delete(socket);
 
+      users[currentRoom] = users[currentRoom].filter(
+        (id) => id !== socket.userId
+      );
+
+      rooms[currentRoom].forEach((client) => {
+        if (client.readyState === 1) {
+          client.send(
+            JSON.stringify({
+              type: "user_list",
+              users: users[currentRoom]
+            })
+          );
+        }
+      });
+
       if (rooms[currentRoom].size === 0) {
         delete rooms[currentRoom];
+        delete users[currentRoom];
       }
-
     }
 
     console.log("User disconnected");
