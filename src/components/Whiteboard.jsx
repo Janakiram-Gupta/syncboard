@@ -7,6 +7,7 @@ import "../styles/board.css";
 import TextLayer from "./TextLayer";
 import { sendTextEvent, sendClearEvent } from "../utils/socket";
 import throttle from "../utils/throttle";
+import useSocketEvents from "../hooks/useSocketEvents";
 
 function Whiteboard() {
   const canvasRef = useRef(null);
@@ -23,39 +24,8 @@ function Whiteboard() {
   } = useCanvasDraw(canvasRef);
 
   useEffect(() => {
-
     const socket = getSocket();
-
     if (!socket) return;
-
-    socket.onmessage = (event) => {
-
-      const message = JSON.parse(event.data);
-
-      if (message.type === "cursor") {
-
-        setCursors((prev) => ({
-          ...prev,
-          [message.userId || "remote"]: message.data
-        }));
-
-      }
-
-      if (message.type === "user_list") {
-        setUsers(message.users);
-      }
-
-      if (message.type === "text") {
-        setTexts((prev) => [...prev, message.data]);
-      }
-
-      if (message.type === "clear") {
-        clearCanvas();
-        setTexts([]);
-      }
-
-    };
-
   }, [clearCanvas]);
 
   useEffect(() => {
@@ -89,6 +59,31 @@ function Whiteboard() {
     return () =>
       window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  useSocketEvents({
+    onUserList: (users) => {
+      setUsers(users);
+    },
+
+    onCursor: (message) => {
+
+      setCursors((prev) => ({
+        ...prev,
+        [message.userId]: message.data
+      }));
+
+    },
+
+    onText: (text) => {
+      setTexts((prev) => [...prev, text]);
+    },
+
+    onClear: () => {
+      clearCanvas();
+      setTexts([]);
+    }
+
+  });
 
   const addText = () => {
     const newText = {
