@@ -68,6 +68,21 @@ function Whiteboard() {
 
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Delete") {
+        setTexts((prev) =>
+          prev.slice(0, -1)
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () =>
+      window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const addText = () => {
     const newText = {
       id: Date.now(),
