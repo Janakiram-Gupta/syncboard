@@ -29,6 +29,20 @@ export function sendDrawEvent(data) {
   );
 }
 
+export function sendCursorEvent(data) {
+  if (!socket) return;
+
+  socket.send(
+    JSON.stringify({
+      type: "broadcast",
+      payload: {
+        type: "cursor",
+        data
+      }
+    })
+  );
+}
+
 export function getSocket() {
   return socket;
 }

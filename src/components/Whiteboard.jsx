@@ -1,12 +1,14 @@
 import { useRef, useEffect, useState } from "react";
+import { getSocket, sendCursorEvent } from "../utils/socket";
+import CursorLayer from "./CursorLayer";
+import UserList from "./UserList";
 import useCanvasDraw from "../hooks/useCanvasDraw";
 import "../styles/board.css";
-import { getSocket } from "../utils/socket";
-import UserList from "./UserList";
 
 function Whiteboard() {
   const canvasRef = useRef(null);
   const [users, setUsers] = useState([]);
+  const [cursors, setCursors] = useState({});
 
   const {
     color,
@@ -25,6 +27,15 @@ function Whiteboard() {
 
       const message = JSON.parse(event.data);
 
+      if (message.type === "cursor") {
+
+        setCursors((prev) => ({
+          ...prev,
+          [message.userId || "remote"]: message.data
+        }));
+
+      }
+
       if (message.type === "user_list") {
         setUsers(message.users);
       }
@@ -33,9 +44,28 @@ function Whiteboard() {
 
   }, []);
 
+  useEffect(() => {
+
+    const handleMouseMove = (e) => {
+
+      sendCursorEvent({
+        x: e.clientX,
+        y: e.clientY
+      });
+
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+
+  }, []);
+
   return (
     <div className="board-container">
       <UserList users={users} />
+      <CursorLayer cursors={cursors} />
+      
       <div className="toolbar">
 
         <label>Color</label>

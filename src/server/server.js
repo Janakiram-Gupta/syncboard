@@ -58,7 +58,12 @@ wss.on("connection", (socket) => {
         rooms[currentRoom].forEach((client) => {
 
           if (client !== socket && client.readyState === 1) {
-            client.send(JSON.stringify(message.payload));
+            client.send(
+              JSON.stringify({
+                ...message.payload,
+                userId: socket.userId
+              })
+            );
           }
 
         });
