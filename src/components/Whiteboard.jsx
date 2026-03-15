@@ -4,11 +4,14 @@ import CursorLayer from "./CursorLayer";
 import UserList from "./UserList";
 import useCanvasDraw from "../hooks/useCanvasDraw";
 import "../styles/board.css";
+import TextLayer from "./TextLayer";
+import { sendTextEvent } from "../utils/socket";
 
 function Whiteboard() {
   const canvasRef = useRef(null);
   const [users, setUsers] = useState([]);
   const [cursors, setCursors] = useState({});
+  const [texts, setTexts] = useState([]);
 
   const {
     color,
@@ -40,6 +43,10 @@ function Whiteboard() {
         setUsers(message.users);
       }
 
+      if (message.type === "text") {
+        setTexts((prev) => [...prev, message.data]);
+      }
+
     };
 
   }, []);
@@ -61,11 +68,26 @@ function Whiteboard() {
 
   }, []);
 
+  const addText = () => {
+    const newText = {
+      id: Date.now(),
+      text: "Edit me",
+      x: 200,
+      y: 200
+    };
+
+    setTexts((prev) => [...prev, newText]);
+
+    sendTextEvent(newText);
+  };
+
   return (
     <div className="board-container">
       <UserList users={users} />
       <CursorLayer cursors={cursors} />
-      
+
+      <TextLayer texts={texts} setTexts={setTexts} />
+
       <div className="toolbar">
 
         <label>Color</label>
@@ -86,6 +108,10 @@ function Whiteboard() {
 
         <button onClick={() => window.location.reload()}>
           Clear
+        </button>
+
+        <button onClick={addText}>
+          Text
         </button>
 
       </div>

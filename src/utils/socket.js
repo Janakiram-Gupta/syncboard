@@ -46,3 +46,16 @@ export function sendCursorEvent(data) {
 export function getSocket() {
   return socket;
 }
+
+export function sendTextEvent(data) {
+  if (!socket) return;
+  socket.send(
+    JSON.stringify({
+      type: "broadcast",
+      payload: {
+        type: "text",
+        data
+      }
+    })
+  );
+}
